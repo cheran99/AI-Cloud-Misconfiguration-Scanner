@@ -16,10 +16,9 @@ def check_iam_roles(session):
                     policy_iterator = policy_paginator.paginate(RoleName=role_name)
                     for policy_page in policy_iterator:
                         for policy in policy_page['PolicyNames']:
-                            PolicyNames = policy
                             response = client.get_role_policy(
                                 RoleName=role_name,
-                                PolicyName=PolicyNames
+                                PolicyName=policy
                             )
 
                             for statement in response['PolicyDocument']['Statement']:
@@ -32,7 +31,30 @@ def check_iam_roles(session):
                                     })
 
                 except client.exceptions.NoSuchEntityException:
-                    print(f"No policy found for role {role_name} with policy name {PolicyNames}")
+                    print(f"No policy found for role {role_name} with policy name {policy}")
+                    continue
+
+                try:
+                    managed_policy_paginator = client.get_paginator('list_attached_role_policies')
+                    managed_policy_iterator = managed_policy_paginator.paginate(RoleName=role_name)
+                    for managed_policy_page in managed_policy_iterator:
+                        for managed_policy in managed_policy_page['AttachedPolicies']:
+                            managed_policy_response = client.get_policy_version(
+                                PolicyArn=managed_policy['PolicyArn'],
+                                VersionId=client.get_policy(PolicyArn=managed_policy['PolicyArn'])['Policy']['DefaultVersionId']
+                            )
+                        
+                            for statement in managed_policy_response['PolicyVersion']['Document']['Statement']:
+                                if statement['Effect'] == 'Allow' and statement['Action'] in ['*', ['*']] and statement['Resource'] in ['*', ['*']]:
+                                    findings.append({
+                                        "resource": role_name,
+                                        "issue": "Role has overly permissive managed policy",
+                                        "severity": "HIGH",
+                                        "service": "IAM",
+                                    })
+
+                except client.exceptions.NoSuchEntityException:
+                    print(f"No managed policy found for role {role_name}")
                     continue
 
     except Exception as e:

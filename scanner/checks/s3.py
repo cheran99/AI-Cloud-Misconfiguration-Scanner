@@ -1,6 +1,3 @@
-import boto3
-
-
 def check_s3_buckets(session):
     client = session.client('s3')
     findings = []

@@ -1,5 +1,3 @@
-import boto3
-
 def check_iam_roles(session):
     client = session.client('iam')
     findings = []

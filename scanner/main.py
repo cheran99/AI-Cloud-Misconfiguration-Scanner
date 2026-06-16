@@ -1,6 +1,7 @@
 from scanner.session import create_session
 from scanner.checks.iam import check_iam_roles
 from scanner.checks.s3 import check_s3_buckets
+from scanner.checks.ec2 import check_ec2_security_groups
 
 
 def run_checks():
@@ -10,6 +11,8 @@ def run_checks():
     findings.extend(check_iam_roles(session))
     # Run S3 checks
     findings.extend(check_s3_buckets(session))
+    # Run EC2 checks
+    findings.extend(check_ec2_security_groups(session))
     return findings
 
 if __name__ == "__main__":

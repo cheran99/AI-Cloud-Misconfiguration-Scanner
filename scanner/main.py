@@ -1,5 +1,6 @@
 from scanner.session import create_session
 from scanner.report import generate_report
+from scanner.output import save_report
 from scanner.checks.iam import check_iam_roles
 from scanner.checks.s3 import check_s3_buckets
 from scanner.checks.ec2 import check_ec2_security_groups
@@ -26,3 +27,5 @@ if __name__ == "__main__":
         
     returned_report = generate_report(findings)
     print(f"Generated Report: {returned_report}")
+
+    save_report(returned_report)

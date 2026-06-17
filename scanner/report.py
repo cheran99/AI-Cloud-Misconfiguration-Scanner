@@ -14,7 +14,7 @@ def generate_report(findings):
     try:
         response = client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=1000,
+            max_tokens=4000,
             messages=[{
                 "role": "user",
                 "content": f"Generate a report based on the following findings: {json.dumps(report['findings'])}"

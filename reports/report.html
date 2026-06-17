@@ -1,0 +1,478 @@
+
+    <html>
+        <head>
+            <style>
+                body {
+                    background-color: #0d1117;
+                    color: #e6edf3;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    max-width: 960px;
+                    margin: 40px auto;
+                    padding: 0 24px;
+                    line-height: 1.6;
+                }
+                h1 {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #58a6ff;
+                    border-bottom: 2px solid #21262d;
+                    padding-bottom: 12px;
+                }
+                h2 {
+                    color: #f0883e;
+                    font-size: 20px;
+                    margin-top: 32px;
+                }
+                h3 {
+                    color: #7ee787;
+                    font-size: 16px;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 16px 0;
+                    font-size: 14px;
+                }
+                th, td {
+                    border: 1px solid #30363d;
+                    padding: 10px 14px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #161b22;
+                    color: #58a6ff;
+                    font-weight: 600;
+                }
+                tr:nth-child(even) {
+                    background-color: #161b22;
+                }
+                ul, ol {
+                    padding-left: 24px;
+                }
+                li {
+                    margin: 4px 0;
+                }
+                code {
+                    background-color: #161b22;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    color: #f85149;
+                }
+                p {
+                    margin: 12px 0;
+                }
+            </style>
+        <title>Cloud Misconfiguration Report</title>
+        </head>
+        <body>
+            <h1>AWS Security Assessment Report</h1>
+<hr />
+<h2>Executive Summary</h2>
+<p>This report presents the findings of a security assessment conducted on AWS infrastructure. A total of <strong>21 security issues</strong> were identified across <strong>EC2</strong> and <strong>CloudTrail</strong> services. All findings are classified as either <strong>HIGH</strong> or <strong>CRITICAL</strong> severity, indicating significant exposure to potential threats including unauthorized access, data breaches, and compromised infrastructure integrity.</p>
+<hr />
+<h2>Findings Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 CRITICAL</td>
+<td>1</td>
+</tr>
+<tr>
+<td>🟠 HIGH</td>
+<td>20</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>21</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Detailed Findings</h2>
+<hr />
+<h3>🔴 CRITICAL — CloudTrail</h3>
+<h4>Finding: No AWS CloudTrail Trails Found</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>CloudTrail</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+No AWS CloudTrail trails are configured in this environment. CloudTrail is the primary auditing and logging service for AWS API activity. Without it, there is <strong>no visibility into user actions, resource changes, or security events</strong> across the AWS account.</p>
+<p><strong>Risk:</strong>
+- Complete lack of audit logging and forensic capability
+- Inability to detect or investigate unauthorized access or malicious activity
+- Non-compliance with major security frameworks (CIS, PCI-DSS, HIPAA, SOC 2)
+- No alerting capability for suspicious API calls or configuration changes</p>
+<p><strong>Recommendation:</strong>
+- Immediately enable CloudTrail in all AWS regions
+- Configure a dedicated S3 bucket with restricted access for log storage
+- Enable log file integrity validation
+- Integrate with Amazon CloudWatch for real-time alerting
+- Consider enabling AWS Config alongside CloudTrail for configuration change tracking</p>
+<hr />
+<h3>🟠 HIGH — EC2 Security Group Misconfigurations</h3>
+<p>A total of <strong>20 HIGH severity findings</strong> were identified across <strong>7 EC2 security groups</strong>, all related to overly permissive inbound rules allowing unrestricted internet access (<code>0.0.0.0/0</code>) on sensitive ports.</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-6</code> (sg-003020051a81a8c82)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>All Traffic</strong></td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This security group permits <strong>all inbound traffic from the internet</strong> across all ports and protocols. This is the most dangerous security group configuration possible, effectively rendering any attached instance fully exposed to the public internet.</p>
+<p><strong>Risk:</strong>
+- Total exposure of all services running on attached instances
+- High risk of exploitation, brute-force attacks, and unauthorized access</p>
+<p><strong>Recommendation:</strong>
+- <strong>Immediately revoke</strong> the all-traffic inbound rule
+- Apply the principle of least privilege — only allow traffic on explicitly required ports from known, trusted IP ranges</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-4</code> (sg-0b1c35cdbed3ecd32)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 80 (HTTP)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 443 (HTTPS)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 5601 (Kibana)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 9200 (Elasticsearch)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This security group exposes web traffic ports as well as <strong>Kibana (5601)</strong> and <strong>Elasticsearch (9200)</strong> directly to the internet. Elasticsearch and Kibana are data analysis tools that often contain sensitive log data and should <strong>never</strong> be publicly accessible.</p>
+<p><strong>Risk:</strong>
+- Unauthorized read/write access to Elasticsearch indices and stored data
+- Data exfiltration of sensitive log information via Kibana
+- Known CVEs targeting exposed Elasticsearch instances</p>
+<p><strong>Recommendation:</strong>
+- Restrict ports 5601 and 9200 to internal VPC CIDR ranges or specific trusted IPs only
+- Place Kibana behind an authenticated reverse proxy or VPN
+- If HTTP (80) is required, restrict to specific IPs or redirect to HTTPS (443)</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-3</code> (sg-0ea3e4a05a67ca02a)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 80 (HTTP)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 443 (HTTPS)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 5601 (Kibana)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 9200 (Elasticsearch)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+Identical misconfiguration to <code>launch-wizard-4</code>. This security group exposes Kibana and Elasticsearch ports publicly alongside standard web ports.</p>
+<p><strong>Risk:</strong> Same as <code>launch-wizard-4</code> above.</p>
+<p><strong>Recommendation:</strong> Same as <code>launch-wizard-4</code> above.</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-2</code> (sg-0a0df35eef090ae38)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 80 (HTTP)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 5601 (Kibana)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 9200 (Elasticsearch)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This security group exposes Kibana and Elasticsearch to the internet, similar to <code>launch-wizard-4</code> and <code>launch-wizard-3</code>, but without HTTPS (443).</p>
+<p><strong>Risk:</strong> Exposure of Elasticsearch and Kibana data; unencrypted HTTP traffic.</p>
+<p><strong>Recommendation:</strong>
+- Restrict ports 5601 and 9200 to internal access only
+- Disable HTTP (80) or redirect to HTTPS with enforced TLS</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-5</code> (sg-086216d42764aa08e)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 443 (HTTPS)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 5044 (Logstash Beats)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 5601 (Kibana)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 9200 (Elasticsearch)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+In addition to Kibana and Elasticsearch, this security group also exposes <strong>Logstash Beats input (port 5044)</strong> to the internet. This suggests a full <strong>ELK Stack (Elasticsearch, Logstash, Kibana)</strong> deployment is exposed publicly.</p>
+<p><strong>Risk:</strong>
+- All risks associated with exposed Elasticsearch and Kibana
+- Logstash port exposure could allow injection of malicious log data
+- Full ELK stack exposure significantly increases the attack surface</p>
+<p><strong>Recommendation:</strong>
+- Restrict all ELK Stack ports (5044, 5601, 9200) to VPC-internal access or VPN-connected clients
+- Use TLS certificates for Logstash Beats input
+- Consider deploying a dedicated log ingestion pipeline within a private subnet</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-1</code> (sg-0ddc1c39a3fcc2123)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 22 (SSH)</td>
+<td>🟠 HIGH</td>
+</tr>
+<tr>
+<td>TCP 443 (HTTPS)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+SSH (port 22) is open to the entire internet (<code>0.0.0.0/0</code>). Public SSH exposure is one of the most commonly exploited attack vectors, frequently targeted by automated brute-force bots.</p>
+<p><strong>Risk:</strong>
+- Brute-force attacks on SSH credentials
+- Exploitation of SSH vulnerabilities if patches are not current
+- Unauthorized remote access to EC2 instances</p>
+<p><strong>Recommendation:</strong>
+- <strong>Immediately restrict SSH (port 22)</strong> to specific, known administrator IP addresses or CIDR blocks
+- Use AWS Systems Manager Session Manager as a replacement for direct SSH access
+- Enforce key-based authentication and disable password authentication
+- Consider deploying a bastion host within a private subnet for SSH access management</p>
+<hr />
+<h4>Security Group: <code>testsecuritygroup</code> (sg-0b2da4349ee7bc901)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 22 (SSH)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This security group has SSH open to the internet. The name "testsecuritygroup" suggests it may have been created for testing purposes and subsequently forgotten. Unused or test resources with permissive rules represent a common security risk.</p>
+<p><strong>Risk:</strong>
+- Same SSH exposure risks as <code>launch-wizard-1</code>
+- Test resources may lack proper monitoring and patch management</p>
+<p><strong>Recommendation:</strong>
+- Restrict or remove the open SSH rule immediately
+- Audit and remove unused/test security groups and associated resources
+- Implement tagging policies to track and manage test resources lifecycle</p>
+<hr />
+<h4>Security Group: <code>launch-wizard-7</code> (sg-0c3704fd44e21ac07)</h4>
+<table>
+<thead>
+<tr>
+<th>Port/Protocol</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TCP 3389 (RDP)</td>
+<td>🟠 HIGH</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+Remote Desktop Protocol (RDP) port 3389 is exposed to the entire internet. RDP is a frequent target for ransomware campaigns, credential stuffing attacks, and exploitation of known vulnerabilities (e.g., BlueKeep).</p>
+<p><strong>Risk:</strong>
+- High risk of ransomware deployment via exposed RDP
+- Brute-force attacks on Windows administrator credentials
+- Exploitation of known RDP vulnerabilities</p>
+<p><strong>Recommendation:</strong>
+- <strong>Immediately restrict RDP (port 3389)</strong> to specific administrator IP addresses
+- Use AWS Systems Manager Session Manager or a VPN for remote Windows access
+- Enable Network Level Authentication (NLA) on all Windows instances
+- Ensure all Windows instances are fully patched</p>
+<hr />
+<h2>Consolidated Recommendations</h2>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Immediate</td>
+<td>Enable AWS CloudTrail in all regions with S3 log storage and integrity validation</td>
+</tr>
+<tr>
+<td>🔴 Immediate</td>
+<td>Remove the all-traffic inbound rule from <code>launch-wizard-6</code></td>
+</tr>
+<tr>
+<td>🔴 Immediate</td>
+<td>Restrict SSH (port 22) on <code>launch-wizard-1</code> and <code>testsecuritygroup</code> to trusted IPs only</td>
+</tr>
+<tr>
+<td>🔴 Immediate</td>
+<td>Restrict RDP (port 3389) on <code>launch-wizard-7</code> to trusted IPs only</td>
+</tr>
+<tr>
+<td>🟠 High</td>
+<td>Restrict Elasticsearch (9200), Kibana (5601), and Logstash (5044) ports to internal VPC access across all affected security groups</td>
+</tr>
+<tr>
+<td>🟠 High</td>
+<td>Review and remediate all <code>launch-wizard-*</code> security groups to enforce least privilege</td>
+</tr>
+<tr>
+<td>🟡 Medium</td>
+<td>Audit and decommission unused or test resources (e.g., <code>testsecuritygroup</code>)</td>
+</tr>
+<tr>
+<td>🟡 Medium</td>
+<td>Implement AWS Config rules to continuously monitor and flag overly permissive security groups</td>
+</tr>
+<tr>
+<td>🟡 Medium</td>
+<td>Evaluate the use of AWS WAF and AWS Shield for public-facing web services</td>
+</tr>
+<tr>
+<td>🟡 Medium</td>
+<td>Establish a Security Group review policy and implement tagging standards</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Compliance Implications</h2>
+<p>The identified findings may result in non-compliance with the following frameworks and regulations:</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Relevant Controls Impacted</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CIS AWS Foundations Benchmark</strong></td>
+<td>4.1, 4.2 (No unrestricted SSH/RDP), 3.x (CloudTrail logging)</td>
+</tr>
+<tr>
+<td><strong>PCI-DSS</strong></td>
+<td>Requirement 1 (Firewall), Requirement 10 (Audit Logs)</td>
+</tr>
+<tr>
+<td><strong>HIPAA</strong></td>
+<td>Access Controls, Audit Controls, Transmission Security</td>
+</tr>
+<tr>
+<td><strong>SOC 2</strong></td>
+<td>Logical Access, Monitoring, Change Management</td>
+</tr>
+<tr>
+<td><strong>NIST CSF</strong></td>
+<td>Identify, Protect, Detect functions</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2>
+<p>The AWS environment assessed presents a <strong>high-risk security posture</strong>. The complete absence of CloudTrail logging is particularly critical, as it means that any malicious activity occurring in this environment — past or present — may have gone entirely undetected. Combined with widespread overly permissive security group configurations exposing sensitive services such as Elasticsearch, Kibana, SSH, and RDP to the public internet, this environment requires <strong>immediate remediation action</strong>.</p>
+<p>It is strongly recommended that the identified issues be addressed in order of priority, beginning with CloudTrail enablement and the restriction of all publicly exposed administrative and data ports.</p>
+<hr />
+<p><em>Report generated based on automated security scan findings. All findings should be validated in context with the specific business requirements and architecture of the assessed environment.</em></p>
+        </body>
+    </html>
+    

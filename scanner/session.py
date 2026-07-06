@@ -1,12 +1,14 @@
 import boto3
 import botocore
+import os
 from rich.console import Console
+from dotenv import load_dotenv
 
 console = Console()
 
 def create_session():
     try:
-        session = boto3.Session(profile_name='ai-scanner', region_name='eu-west-2')
+        session = boto3.Session(profile_name=os.getenv("AWS_PROFILE"), region_name='eu-west-2')
         client = session.client('sts')
         identity = client.get_caller_identity()
 

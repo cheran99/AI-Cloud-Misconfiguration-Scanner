@@ -1,1 +1,2 @@
-# AI-Cloud-Misconfiguration-Scanner
+# AI-Powered Cloud Misconfiguration Scanner
+

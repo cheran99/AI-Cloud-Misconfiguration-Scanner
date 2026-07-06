@@ -1,7 +1,7 @@
 from scanner.session import create_session
 from scanner.report import generate_report
 from scanner.output import save_report
-from scanner.checks.iam import check_iam_roles
+from scanner.checks.iam import is_overly_permissive, check_iam_users, check_iam_roles
 from scanner.checks.s3 import check_s3_buckets
 from scanner.checks.ec2 import check_ec2_security_groups
 from scanner.checks.cloudtrail import check_cloudtrail
@@ -11,6 +11,7 @@ def run_checks():
     session = create_session()
     findings = []
     # Run IAM checks
+    findings.extend(check_iam_users(session))
     findings.extend(check_iam_roles(session))
     # Run S3 checks
     findings.extend(check_s3_buckets(session))
@@ -23,7 +24,7 @@ def run_checks():
 if __name__ == "__main__":
     findings = run_checks()
     for finding in findings:
-        print(f"Service: {finding['service']}, Resource: {finding.get('resource', 'N/A')}, Issue: {finding['issue']}")
+        print(f"Service: {finding['service']}, Resource: {finding.get('resource', 'N/A')}, Issue: {finding['issue']}, Severity: {finding['severity']}, Affected Users: {finding.get('affected_users', 'N/A')}")
         
     returned_report = generate_report(findings)
     print(f"Generated Report: {returned_report}")

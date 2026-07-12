@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 console = Console()
 
+load_dotenv()
+
 def create_session():
     try:
         session = boto3.Session(profile_name=os.getenv("AWS_PROFILE"), region_name='eu-west-2')

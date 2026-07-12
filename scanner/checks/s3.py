@@ -1,6 +1,10 @@
+import botocore
+
+
 def check_s3_buckets(session):
     client = session.client('s3')
     findings = []
+    warnings = []
     
     try:
         response = client.list_buckets()
@@ -27,11 +31,27 @@ def check_s3_buckets(session):
                         "service": "S3",
                     })
 
-            except client.exceptions.NoSuchPublicAccessBlockConfiguration as e:
-                findings.append({
+            except botocore.exceptions.ClientError as e:
+                code = e.response['Error']['Code']
+                if code == 'NoSuchPublicAccessBlockConfiguration':
+                    findings.append({
                         "resource": bucket['Name'],
                         "issue": "No public access block configuration found",
                         "severity": "HIGH",
+                        "service": "S3",
+                    })
+                elif code == 'AccessDenied':
+                    warnings.append({
+                        "resource": bucket['Name'],
+                        "issue": "Access denied when checking public access block configuration",
+                        "severity": "MEDIUM",
+                        "service": "S3",
+                    })
+                else:
+                    warnings.append({
+                        "resource": bucket['Name'],
+                        "issue": f"Unexpected error when checking public access block configuration: {code}",
+                        "severity": "MEDIUM",
                         "service": "S3",
                     })
                 
@@ -47,15 +67,31 @@ def check_s3_buckets(session):
                         "severity": "HIGH",
                         "service": "S3",
                     })
-            except client.exceptions.ServerSideEncryptionConfigurationNotFoundError:
-                findings.append({
-                    "resource": bucket['Name'],
-                    "issue": "No bucket encryption configuration found",
-                    "severity": "CRITICAL",
-                    "service": "S3",
-                })
+            except botocore.exceptions.ClientError as e:
+                code = e.response['Error']['Code']
+                if code == 'ServerSideEncryptionConfigurationNotFoundError':
+                    findings.append({
+                        "resource": bucket['Name'],
+                        "issue": "No bucket encryption configuration found",
+                        "severity": "CRITICAL",
+                        "service": "S3",
+                    })
+                elif code == 'AccessDenied':
+                    warnings.append({
+                        "resource": bucket['Name'],
+                        "issue": "Access denied when checking bucket encryption configuration",
+                        "severity": "MEDIUM",
+                        "service": "S3",
+                    })
+                else:
+                    warnings.append({
+                        "resource": bucket['Name'],
+                        "issue": f"Unexpected error when checking bucket encryption configuration: {code}",
+                        "severity": "MEDIUM",
+                        "service": "S3",
+                    })
 
     except Exception as e:
         print(f"Error listing buckets: {e}")
 
-    return findings
+    return findings, warnings

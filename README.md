@@ -57,7 +57,7 @@ This scanner checks for the following misconfigurations in the following AWS res
 | Resources | What It Scans |
 |---|---|
 | S3 | Is it exposed to the public, and is it encrypted in a secure way? |
-| IAM | Does the role have full, unrestricted access to everything in the account? |
+| IAM | Does the user/usergroup/role have full, unrestricted access to everything in the account? |
 | EC2 | Is the EC2 firewall (security group) open to the public? |
 | CloudTrail | Are there any existing trails, and do they record information on who did what and when across the cloud environment? |
 
@@ -149,6 +149,36 @@ This scanner checks for the following misconfigurations in the following AWS res
   python -m scanner.main  
   ```
 
+
+## Robust Error Handling & Isolated Testing
+
+While testing the S3 checks against a live AWS account, the scanner crashed with an `AttributeError` the moment it encountered a bucket with no Public Access Block configuration. Investigating the crash surfaced a deeper issue: the code was written to catch a named exception class (e.g. `client.exceptions.NoSuchPublicAccessBlockConfiguration`) that doesn't actually exist in this version of `botocore`. AWS documents `NoSuchPublicAccessBlockConfiguration` as an API error code, not an auto-generated Python exception class, so the `except` clause failed before it ever ran.
+
+The fix was to catch the generic `botocore.exceptions.ClientError` and branch `on e.response['Error']['Code']` instead of relying on a specific exception name. This also surfaced a second, more subtle problem: the original code treated `AccessDenied` (the scanner lacking permission to check a setting) identically to a genuine misconfiguration (the setting being absent or permissive). Both produced the same "finding," even though these are fundamentally different situations. Conflating them would make the scanner's own permission gaps look like security findings on the target account.
+
+The scanner now distinguishes between three outcomes per check:
+- **A real finding**: the setting exists and is genuinely misconfigured, or is confirmed absent.
+- **A warning**: the scanner was denied permission to check, which reflects the scanner's own IAM posture, not the target resource.
+- **An unexpected error**: any other AWS error code, logged separately so it's never silently swallowed.
+
+`findings` and `warnings` are now returned and reported separately, so a reader can immediately tell "this bucket is misconfigured" apart from "the scanner couldn't verify this".
+
+### Testing without depending on live AWS state
+
+Reliably triggering each of these code paths against a real AWS account isn't practical. For example, once the scanner's IAM permissions were corrected, it became impossible to naturally reproduce an `AccessDenied` response to verify that branch still worked. To test each outcome in isolation, the S3 check function is exercised against a mocked boto3 client using Python's `unittest.mock`, with `session.client` patched to return a controlled fake client whose methods raise specific, deliberately chosen `ClientError` codes.
+
+This allows every branch, including genuine misconfiguration, access denied, and unexpected error, to be verified independently and repeatably, without needing to manufacture matching real world AWS states (which, in some cases, AWS's own default behavior makes deliberately difficult to reproduce).
+
+## Lessons Learned: A Bug That Worked By Accident
+
+Not every bug announces itself with a crash. While building isolated tests for the S3 checks above, a standalone test script unexpectedly authenticated as the wrong IAM identity: the original `terraform-bootstrap` account instead of the scoped down `ai_scanner_user` the scanner is meant to run as.
+
+The root cause traced back to how the AWS profile name gets loaded. `session.py` reads the AWS profile from an environment variable (`AWS_PROFILE`) that's meant to be loaded from a `.env` file via `load_dotenv()`. However, `session.py` only imported that library; it never actually called it. The scanner had been working correctly anyway, purely as a side effect: `main.py` also imports `report.py`, which does call `load_dotenv()` at import time, and Python executes that import before `create_session()` ever runs. The environment variable was being populated as an unrelated side effect of an unrelated file, for an unrelated reason (loading a separate API key for report generation).
+
+This meant correct behavior depended entirely on import order in one specific entry point. Any new script that imported `create_session()` directly, including the isolated test scripts built for this project, would silently authenticate as the wrong AWS identity, with no error or warning at all.
+
+The fix was to move `load_dotenv()` into `session.py` itself, the file that actually depends on the environment variable, so correct behavior no longer depends on what else happens to be imported elsewhere in the program.
+This class of bug is arguably more dangerous than a crash. A crash is loud and gets fixed immediately. A silent fallback to the wrong AWS identity could just as easily have gone unnoticed, and in a security tool specifically, authenticating as the wrong account (with different, possibly broader permissions) is a meaningful correctness issue in its own right, not just a code quality nitpick.
 
 
 

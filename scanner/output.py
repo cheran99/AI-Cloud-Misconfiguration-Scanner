@@ -1,5 +1,6 @@
 import markdown
 import os
+from datetime import datetime
 
 def save_report(report_text):
     html_body = markdown.markdown(report_text, extensions=['tables'])
@@ -77,6 +78,8 @@ def save_report(report_text):
     """
 
     os.makedirs("reports", exist_ok=True)
-    with open("reports/report.html", "w", encoding="utf-8") as f:
+    now = datetime.now()
+    formatted_date = now.strftime("%Y-%m-%d_%H-%M")
+    with open(f"reports/report_{formatted_date}.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-    print("Report saved to reports/report.html")
+    print(f"Report saved to reports/report_{formatted_date}.html")

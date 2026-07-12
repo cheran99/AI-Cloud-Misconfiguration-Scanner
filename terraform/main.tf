@@ -27,6 +27,8 @@ resource "aws_iam_policy" "scanner_policy" {
                     "s3:GetBucketPolicy",
                     "s3:GetBucketEncryption",
                     "s3:GetPublicAccessBlock",
+                    "s3:GetBucketPublicAccessBlock",
+                    "s3:GetEncryptionConfiguration",
                     "iam:ListUsers",
                     "iam:ListUserPolicies",
                     "iam:GetUserPolicy",

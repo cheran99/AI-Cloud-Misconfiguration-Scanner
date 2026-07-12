@@ -10,21 +10,28 @@ from scanner.checks.cloudtrail import check_cloudtrail
 def run_checks():
     session = create_session()
     findings = []
+    warnings = []
     # Run IAM checks
     findings.extend(check_iam_users(session))
     findings.extend(check_iam_roles(session))
     # Run S3 checks
-    findings.extend(check_s3_buckets(session))
+    s3_findings, s3_warnings = check_s3_buckets(session)
+    findings.extend(s3_findings)
+    warnings.extend(s3_warnings)
     # Run EC2 checks
     findings.extend(check_ec2_security_groups(session))
     # Run CloudTrail checks
     findings.extend(check_cloudtrail(session))
-    return findings
+    return findings, warnings
+
 
 if __name__ == "__main__":
-    findings = run_checks()
+    findings, warnings = run_checks()
     for finding in findings:
         print(f"Service: {finding['service']}, Resource: {finding.get('resource', 'N/A')}, Issue: {finding['issue']}, Severity: {finding['severity']}, Affected Users: {finding.get('affected_users', 'N/A')}")
+    
+    for warning in warnings:
+        print(f"Service: {warning['service']}, Resource: {warning.get('resource', 'N/A')}, Issue: {warning['issue']}, Severity: {warning['severity']}")
         
     returned_report = generate_report(findings)
     print(f"Generated Report: {returned_report}")

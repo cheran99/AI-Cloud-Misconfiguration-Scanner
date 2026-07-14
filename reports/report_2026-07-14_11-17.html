@@ -1,0 +1,1010 @@
+
+    <html>
+        <head>
+            <style>
+                body {
+                    background-color: #0d1117;
+                    color: #e6edf3;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    max-width: 960px;
+                    margin: 40px auto;
+                    padding: 0 24px;
+                    line-height: 1.6;
+                }
+                h1 {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #58a6ff;
+                    border-bottom: 2px solid #21262d;
+                    padding-bottom: 12px;
+                }
+                h2 {
+                    color: #f0883e;
+                    font-size: 20px;
+                    margin-top: 32px;
+                }
+                h3 {
+                    color: #7ee787;
+                    font-size: 16px;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 16px 0;
+                    font-size: 14px;
+                }
+                th, td {
+                    border: 1px solid #30363d;
+                    padding: 10px 14px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #161b22;
+                    color: #58a6ff;
+                    font-weight: 600;
+                }
+                tr:nth-child(even) {
+                    background-color: #161b22;
+                }
+                ul, ol {
+                    padding-left: 24px;
+                }
+                li {
+                    margin: 4px 0;
+                }
+                code {
+                    background-color: #161b22;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    color: #f85149;
+                }
+                p {
+                    margin: 12px 0;
+                }
+            </style>
+        <title>Cloud Misconfiguration Report</title>
+        </head>
+        <body>
+            <h1>AWS Security Assessment Report</h1>
+<hr />
+<h2>Executive Summary</h2>
+<p>This report presents the findings of an automated security assessment conducted against the AWS environment. A total of <strong>26 findings</strong> were identified, spanning three AWS services: <strong>IAM</strong>, <strong>EC2</strong>, and <strong>CloudTrail</strong>. All findings are rated <strong>HIGH</strong> or <strong>CRITICAL</strong> severity, indicating significant security risk requiring prompt remediation.</p>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 CRITICAL</td>
+<td>1</td>
+</tr>
+<tr>
+<td>🟠 HIGH</td>
+<td>25</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>26</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Findings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAM</td>
+<td>7</td>
+</tr>
+<tr>
+<td>EC2</td>
+<td>18</td>
+</tr>
+<tr>
+<td>CloudTrail</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Key Risk Statement:</strong> The absence of CloudTrail logging, combined with broadly exposed EC2 security groups and overly permissive IAM policies, creates a threat environment where unauthorized access could occur, escalate privileges, and go entirely undetected.</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#1-critical-findings">Critical Findings</a></li>
+<li><a href="#2-iam-findings">IAM Findings</a></li>
+<li><a href="#3-ec2-security-group-findings">EC2 Security Group Findings</a></li>
+<li><a href="#4-risk-summary-matrix">Risk Summary Matrix</a></li>
+<li><a href="#5-remediation-recommendations">Remediation Recommendations</a></li>
+<li><a href="#6-appendix">Appendix</a></li>
+</ol>
+<hr />
+<h2>1. Critical Findings</h2>
+<h3>🔴 CRIT-001 — No AWS CloudTrail Trails Found</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>CloudTrail</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>Account-wide</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+No AWS CloudTrail trails exist in this AWS account. CloudTrail is the primary auditing and logging mechanism for AWS API activity. Without it, there is <strong>no record of any action</strong> taken against AWS resources — including IAM changes, EC2 modifications, data access events, or login activity.</p>
+<p><strong>Impact:</strong>
+- Complete loss of audit trail and forensic capability
+- Inability to detect or investigate security incidents, data breaches, or insider threats
+- Non-compliance with virtually all major regulatory frameworks (PCI-DSS, HIPAA, SOC 2, ISO 27001, CIS AWS Benchmark)
+- No alerting capability for suspicious API calls or privilege escalation events</p>
+<p><strong>Recommended Action:</strong>
+Enable a multi-region CloudTrail trail immediately, with log file integrity validation enabled and logs delivered to a dedicated, access-controlled S3 bucket. Consider integrating with CloudWatch Logs for real-time alerting.</p>
+<hr />
+<h2>2. IAM Findings</h2>
+<h3>🟠 IAM-001 — Overly Permissive Policy: <code>ai_scanner_user</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>ai_scanner_user</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>IAM User</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+The IAM user <code>ai_scanner_user</code> has been assigned a managed policy that grants excessively broad permissions. Programmatic or interactive users should operate under the principle of least privilege, with permissions scoped to only the specific actions and resources required for their function.</p>
+<p><strong>Impact:</strong>
+- Potential for privilege abuse if credentials are compromised or misused
+- Expanded blast radius in the event of account compromise
+- Violates the AWS Well-Architected Framework security pillar</p>
+<hr />
+<h3>🟠 IAM-002 — Overly Permissive Policy: <code>terraform-bootstrap</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>terraform-bootstrap</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>IAM Role/User</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+The <code>terraform-bootstrap</code> principal is associated with a managed policy granting overly broad permissions. Infrastructure-as-Code principals are high-value targets; if compromised, an attacker could use Terraform to deploy backdoors, exfiltrate data, or destroy infrastructure.</p>
+<p><strong>Impact:</strong>
+- Critical risk if CI/CD pipeline credentials are exposed
+- Unrestricted Terraform execution could lead to complete environment compromise</p>
+<hr />
+<h3>🟠 IAM-003 — Overly Permissive Policy: <code>AWSServiceRoleForResourceExplorer</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForResourceExplorer</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>AWS Managed Service Role</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This AWS-managed service role has been identified with three broad permission sets applied to <strong>all resources (<code>*</code>)</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Permission Group</th>
+<th>Action Count</th>
+<th>Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group 1</td>
+<td>12 actions</td>
+<td><code>organizations</code>, <code>resource-explorer-2</code></td>
+</tr>
+<tr>
+<td>Group 2</td>
+<td>725 actions</td>
+<td><code>access-analyzer</code>, <code>acm</code>, <code>acm-pca</code>, <code>airflow</code>, <code>amplify</code> + 183 more</td>
+</tr>
+<tr>
+<td>Group 3</td>
+<td>139 actions</td>
+<td><code>backup</code>, <code>bedrock</code>, <code>bedrock-agentcore</code>, <code>budgets</code>, <code>cleanrooms</code> + 39 more</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> While AWS Managed Service Roles are controlled by AWS, the breadth of permissions (870+ actions across 220+ services scoped to <code>*</code>) should be reviewed to confirm this role is necessary and that Resource Explorer is configured with appropriate scope.</p>
+<hr />
+<h3>🟠 IAM-004 — Overly Permissive Policy: <code>AWSServiceRoleForSupport</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForSupport</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>AWS Managed Service Role</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+This AWS Support service role carries three extremely broad permission groups totaling over <strong>4,383 actions</strong> across more than <strong>250 AWS services</strong>, all scoped to <code>*</code> (all resources):</p>
+<table>
+<thead>
+<tr>
+<th>Permission Group</th>
+<th>Action Count</th>
+<th>Sample Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group 1</td>
+<td>1,504 actions</td>
+<td><code>access-analyzer</code>, <code>account</code>, <code>acm</code>, <code>eks</code> + 82 more</td>
+</tr>
+<tr>
+<td>Group 2</td>
+<td>1,359 actions</td>
+<td><code>eks</code>, <code>elasticache</code>, <code>elasticbeanstalk</code>, <code>elasticfilesystem</code> + 79 more</td>
+</tr>
+<tr>
+<td>Group 3</td>
+<td>1,520 actions</td>
+<td><code>oam</code>, <code>observabilityadmin</code>, <code>odb</code>, <code>omics</code>, <code>opsworks</code> + 90 more</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note:</strong> This is an AWS-managed role required for AWS Support access. Review whether AWS Support is actively needed and what support tier is enabled, as higher tiers grant broader access to AWS support engineers.</p>
+<hr />
+<h3>🟠 IAM-005 — Overly Permissive Policy: <code>AWSServiceRoleForTrustedAdvisor</code></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForTrustedAdvisor</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>AWS Managed Service Role</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+The Trusted Advisor service role has been assigned a policy granting <strong>115 actions</strong> across <strong>24+ services</strong> scoped to all resources, including <code>access-analyzer</code>, <code>autoscaling</code>, <code>cloudformation</code>, <code>cloudfront</code>, and others.</p>
+<p><strong>Note:</strong> This is an AWS-managed service role. Verify that Trusted Advisor is actively in use and that its role permissions align with expectations.</p>
+<hr />
+<h3>🟠 IAM-006 — Overly Permissive Policies: <code>EC2InstanceConnectRole</code> (Two Policies)</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>EC2InstanceConnectRole</code></td>
+</tr>
+<tr>
+<td><strong>Resource Type</strong></td>
+<td>IAM Role</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Description:</strong>
+The <code>EC2InstanceConnectRole</code> has <strong>two separate overly permissive policies</strong> attached, both scoped to all resources (<code>*</code>):</p>
+<p><strong>Policy 1:</strong>
+| Actions | Service |
+|---------|---------|
+| 1 action | <code>ec2-instance-connect</code> |</p>
+<p><strong>Policy 2:</strong>
+| Actions | Service |
+|---------|---------|
+| 14 actions | <code>ssm</code> |
+| 8 actions | <code>s3</code> |
+| 6 actions | <code>ec2messages</code> |
+| 5 actions | <code>logs</code> |
+| 4 actions | <code>ssmmessages</code> |
+| 2 actions | <code>ds</code> |
+| 1 action | <code>cloudwatch</code> |
+| 1 action | <code>ec2</code> |</p>
+<p><strong>Impact:</strong>
+The combination of SSM, S3, EC2, and directory service permissions scoped to all resources significantly exceeds what is required for EC2 Instance Connect functionality. If this role is assumed by a compromised instance, an attacker could access S3 data, run SSM commands on other instances, and write to CloudWatch logs.</p>
+<p><strong>Recommended Action:</strong>
+Scope all permissions to specific resource ARNs. Separate the broad SSM/S3 managed policy from the instance connect policy and restrict to least-privilege.</p>
+<hr />
+<h2>3. EC2 Security Group Findings</h2>
+<p>The following security groups have inbound rules permitting unrestricted internet access (<code>0.0.0.0/0</code> or <code>::/0</code>) on sensitive ports. This exposes underlying EC2 instances to scanning, brute-force attacks, and exploitation from any source on the internet.</p>
+<h3>🟠 EC2-001 — <code>launch-wizard-4</code> (sg-0b1c35cdbed3ecd32)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>443</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>5601</td>
+<td>TCP</td>
+<td>Open to Internet (Kibana)</td>
+</tr>
+<tr>
+<td>9200</td>
+<td>TCP</td>
+<td>Open to Internet (Elasticsearch)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> Ports 5601 (Kibana) and 9200 (Elasticsearch) are publicly accessible. Unauthenticated Elasticsearch instances are a well-documented vector for data exfiltration. This instance likely hosts an ELK stack with direct internet exposure.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-002 — <code>testsecuritygroup</code> (sg-0b2da4349ee7bc901)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>TCP</td>
+<td>Open to Internet (SSH)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> SSH exposed to the internet is a primary brute-force target. Even with key-based authentication, unpatched SSH services are vulnerable to exploitation.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-003 — <code>launch-wizard-6</code> (sg-003020051a81a8c82)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All Traffic</td>
+<td>All</td>
+<td>Open to Internet</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Critical Configuration:</strong> This security group permits <strong>all inbound traffic on all ports and all protocols</strong> from the internet. This is the most dangerous possible security group configuration and should be treated as an emergency remediation item.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-004 — <code>launch-wizard-2</code> (sg-0a0df35eef090ae38)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>5601</td>
+<td>TCP</td>
+<td>Open to Internet (Kibana)</td>
+</tr>
+<tr>
+<td>9200</td>
+<td>TCP</td>
+<td>Open to Internet (Elasticsearch)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> Same ELK stack exposure pattern as <code>launch-wizard-4</code>.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-005 — <code>launch-wizard-7</code> (sg-0c3704fd44e21ac07)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3389</td>
+<td>TCP</td>
+<td>Open to Internet (RDP)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> RDP exposed to the internet is a leading attack vector for ransomware and lateral movement. Brute-force and credential stuffing attacks against RDP are extremely common.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-006 — <code>launch-wizard-1</code> (sg-0ddc1c39a3fcc2123)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>TCP</td>
+<td>Open to Internet (SSH)</td>
+</tr>
+<tr>
+<td>443</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>🟠 EC2-007 — <code>launch-wizard-3</code> (sg-0ea3e4a05a67ca02a)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>443</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>5601</td>
+<td>TCP</td>
+<td>Open to Internet (Kibana)</td>
+</tr>
+<tr>
+<td>9200</td>
+<td>TCP</td>
+<td>Open to Internet (Elasticsearch)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> Third security group exposing the ELK stack (Kibana + Elasticsearch) to the internet.</p>
+</blockquote>
+<hr />
+<h3>🟠 EC2-008 — <code>launch-wizard-5</code> (sg-086216d42764aa08e)</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Exposure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>443</td>
+<td>TCP</td>
+<td>Open to Internet</td>
+</tr>
+<tr>
+<td>5044</td>
+<td>TCP</td>
+<td>Open to Internet (Logstash Beats)</td>
+</tr>
+<tr>
+<td>5601</td>
+<td>TCP</td>
+<td>Open to Internet (Kibana)</td>
+</tr>
+<tr>
+<td>9200</td>
+<td>TCP</td>
+<td>Open to Internet (Elasticsearch)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Notable Risk:</strong> Port 5044 (Logstash Beats input) is also exposed, completing a fully public-facing ELK stack. Log ingestion endpoints exposed to the internet can be abused for log injection attacks.</p>
+</blockquote>
+<hr />
+<h2>4. Risk Summary Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Finding ID</th>
+<th>Resource</th>
+<th>Service</th>
+<th>Severity</th>
+<th>Category</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CRIT-001</td>
+<td>Account-wide</td>
+<td>CloudTrail</td>
+<td>🔴 CRITICAL</td>
+<td>Logging &amp; Monitoring</td>
+</tr>
+<tr>
+<td>IAM-001</td>
+<td><code>ai_scanner_user</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>IAM-002</td>
+<td><code>terraform-bootstrap</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>IAM-003</td>
+<td><code>AWSServiceRoleForResourceExplorer</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>IAM-004</td>
+<td><code>AWSServiceRoleForSupport</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>IAM-005</td>
+<td><code>AWSServiceRoleForTrustedAdvisor</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>IAM-006</td>
+<td><code>EC2InstanceConnectRole</code></td>
+<td>IAM</td>
+<td>🟠 HIGH</td>
+<td>Overpermissive Policy</td>
+</tr>
+<tr>
+<td>EC2-001</td>
+<td><code>launch-wizard-4</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-002</td>
+<td><code>testsecuritygroup</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-003</td>
+<td><code>launch-wizard-6</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-004</td>
+<td><code>launch-wizard-2</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-005</td>
+<td><code>launch-wizard-7</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-006</td>
+<td><code>launch-wizard-1</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-007</td>
+<td><code>launch-wizard-3</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+<tr>
+<td>EC2-008</td>
+<td><code>launch-wizard-5</code></td>
+<td>EC2</td>
+<td>🟠 HIGH</td>
+<td>Network Exposure</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Remediation Recommendations</h2>
+<h3>Priority 1 — Immediate Actions (Within 24 Hours)</h3>
+<h4>✅ Enable AWS CloudTrail</h4>
+<p><code>1. Navigate to AWS Console → CloudTrail → Create Trail
+2. Enable for all regions (multi-region trail)
+3. Enable log file integrity validation
+4. Deliver logs to a dedicated S3 bucket with restrictive bucket policy
+5. Enable CloudWatch Logs integration for real-time alerting
+6. Consider enabling CloudTrail Insights for anomaly detection</code></p>
+<h4>✅ Restrict <code>launch-wizard-6</code> (All Traffic Open)</h4>
+<p><code>1. Navigate to EC2 → Security Groups → sg-003020051a81a8c82
+2. Remove the inbound rule permitting all traffic from 0.0.0.0/0
+3. Add only the specific ports and source IPs required for operation
+4. If unused, delete the security group entirely</code></p>
+<h4>✅ Restrict ELK Stack Ports (9200, 5601, 5044)</h4>
+<p>```
+Affected groups: sg-0b1c35cdbed3ecd32, sg-0a0df35eef090ae38, 
+                 sg-0ea3e4a05a67ca02a, sg-086216d42764aa08e</p>
+<ol>
+<li>Remove public inbound rules for ports 9200, 5601, and 5044</li>
+<li>Restrict access to specific trusted IP ranges or VPN CIDR blocks</li>
+<li>Place Elasticsearch behind a VPC with no direct internet access</li>
+<li>Use an application load balancer with authentication for Kibana
+```</li>
+</ol>
+<hr />
+<h3>Priority 2 — Short-Term Actions (Within 72 Hours)</h3>
+<h4>✅ Restrict SSH (Port 22) and RDP (Port 3389)</h4>
+<p>```
+Affected groups: sg-0b2da4349ee7bc901 (SSH), sg-0ddc1c39a3fcc2123 (SSH),
+                 sg-0c3704fd44e21ac07 (RDP)</p>
+<ol>
+<li>Remove inbound rules for ports 22 and 3389 from 0.0.0.0/0</li>
+<li>Restrict to specific corporate IP ranges or VPN CIDR blocks</li>
+<li>Consider migrating SSH/RDP access to AWS Systems Manager Session Manager
+   (eliminates need for open SSH/RDP entirely)</li>
+<li>Enable MFA for any remaining direct access
+```</li>
+</ol>
+<h4>✅ Apply Least Privilege to <code>ai_scanner_user</code> and <code>terraform-bootstrap</code></h4>
+<p><code>1. Review current attached policies for both principals
+2. Use AWS IAM Access Analyzer to identify unused permissions
+3. Replace broad managed policies with custom policies scoped to:
+   - Specific actions required for the use case
+   - Specific resource ARNs where possible
+4. For terraform-bootstrap, scope to only the AWS services Terraform manages
+5. Enable periodic access reviews using IAM Access Analyzer</code></p>
+<h4>✅ Scope <code>EC2InstanceConnectRole</code> Permissions</h4>
+<p><code>1. Review attached managed policies
+2. Remove the broad SSM/S3 managed policy
+3. Create a custom policy with only required permissions:
+   - ec2-instance-connect:SendSSHPublicKey on specific instance ARNs
+   - ssm:StartSession scoped to specific instance ARNs
+4. Restrict S3 permissions to specific buckets if required
+5. Set resource conditions to limit to specific regions and account IDs</code></p>
+<hr />
+<h3>Priority 3 — Medium-Term Actions (Within 2 Weeks)</h3>
+<h4>✅ Review AWS Service-Linked Roles</h4>
+<p>```
+For: AWSServiceRoleForResourceExplorer, AWSServiceRoleForSupport, 
+     AWSServiceRoleForTrustedAdvisor</p>
+<ol>
+<li>Confirm each service is actively in use and required</li>
+<li>If AWS Support is not required at the current tier, downgrade or disable</li>
+<li>If Resource Explorer is not in active use, consider disabling the service</li>
+<li>Document justification for each service-linked role in use</li>
+<li>Note: AWS-managed service role policies cannot be modified directly;
+   control is exercised by enabling/disabling the underlying service
+```</li>
+</ol>
+<h4>✅ Audit and Rename Launch Wizard Security Groups</h4>
+<p><code>1. "launch-wizard-*" names indicate auto-generated groups from EC2 launch wizard
+2. These are often created ad-hoc and not maintained
+3. Conduct a full audit: identify which instances use each group
+4. Replace with environment-specific, purpose-named security groups
+5. Implement a security group naming convention and tagging policy
+6. Remove unused security groups</code></p>
+<h4>✅ Implement Preventive Controls</h4>
+<p><code>1. Enable AWS Config with managed rules:
+   - restricted-ssh
+   - restricted-common-ports
+   - iam-no-inline-policy-check
+   - cloudtrail-enabled
+2. Deploy AWS Security Hub with CIS AWS Foundations Benchmark
+3. Implement AWS Organizations Service Control Policies (SCPs) to prevent:
+   - CloudTrail deletion/disabling
+   - Public S3 bucket creation
+   - Security group rules permitting 0.0.0.0/0 on sensitive ports</code></p>
+<hr />
+<h2>6. Appendix</h2>
+<h3>Appendix A — Affected Security Group Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Security Group Name</th>
+<th>Security Group ID</th>
+<th>Exposed Ports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>launch-wizard-4</code></td>
+<td>sg-0b1c35cdbed3ecd32</td>
+<td>80, 443, 5601, 9200</td>
+</tr>
+<tr>
+<td><code>testsecuritygroup</code></td>
+<td>sg-0b2da4349ee7bc901</td>
+<td>22</td>
+</tr>
+<tr>
+<td><code>launch-wizard-6</code></td>
+<td>sg-003020051a81a8c82</td>
+<td>All Traffic</td>
+</tr>
+<tr>
+<td><code>launch-wizard-2</code></td>
+<td>sg-0a0df35eef090ae38</td>
+<td>80, 5601, 9200</td>
+</tr>
+<tr>
+<td><code>launch-wizard-7</code></td>
+<td>sg-0c3704fd44e21ac07</td>
+<td>3389</td>
+</tr>
+<tr>
+<td><code>launch-wizard-1</code></td>
+<td>sg-0ddc1c39a3fcc2123</td>
+<td>22, 443</td>
+</tr>
+<tr>
+<td><code>launch-wizard-3</code></td>
+<td>sg-0ea3e4a05a67ca02a</td>
+<td>80, 443, 5601, 9200</td>
+</tr>
+<tr>
+<td><code>launch-wizard-5</code></td>
+<td>sg-086216d42764aa08e</td>
+<td>443, 5044, 5601, 9200</td>
+</tr>
+</tbody>
+</table>
+<h3>Appendix B — Port Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Service</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>22</td>
+<td>SSH</td>
+<td>Brute-force, credential attacks</td>
+</tr>
+<tr>
+<td>80</td>
+<td>HTTP</td>
+<td>Unencrypted web traffic, web attacks</td>
+</tr>
+<tr>
+<td>443</td>
+<td>HTTPS</td>
+<td>Web attacks if misconfigured</td>
+</tr>
+<tr>
+<td>3389</td>
+<td>RDP</td>
+<td>Ransomware, brute-force, BlueKeep</td>
+</tr>
+<tr>
+<td>5044</td>
+<td>Logstash Beats</td>
+<td>Log injection attacks</td>
+</tr>
+<tr>
+<td>5601</td>
+<td>Kibana</td>
+<td>Unauthorized data access, CVEs</td>
+</tr>
+<tr>
+<td>9200</td>
+<td>Elasticsearch</td>
+<td>Unauthenticated data access, CVEs</td>
+</tr>
+</tbody>
+</table>
+<h3>Appendix C — Compliance Framework Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>CIS AWS Benchmark</th>
+<th>NIST 800-53</th>
+<th>PCI-DSS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No CloudTrail</td>
+<td>CIS 3.1</td>
+<td>AU-2, AU-12</td>
+<td>10.1, 10.2</td>
+</tr>
+<tr>
+<td>Open SSH/RDP</td>
+<td>CIS 5.2, 5.3</td>
+<td>SC-7, AC-17</td>
+<td>1.2.1</td>
+</tr>
+<tr>
+<td>Open All Traffic</td>
+<td>CIS 5.4</td>
+<td>SC-7</td>
+<td>1.2.1</td>
+</tr>
+<tr>
+<td>ELK Stack Exposed</td>
+<td>CIS 5.4</td>
+<td>SC-7, AC-3</td>
+<td>1.3.2</td>
+</tr>
+<tr>
+<td>Overpermissive IAM</td>
+<td>CIS 1.16</td>
+<td>AC-2, AC-6</td>
+<td>7.1.2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Report generated by automated security scanner. All findings should be validated and prioritized according to your organization's risk appetite and operational context before remediation. Findings related to AWS-managed service roles (service-linked roles) should be reviewed against AWS documentation to confirm expected behavior.</em></p>
+        </body>
+    </html>
+    

@@ -159,7 +159,8 @@ This scanner checks for the following misconfigurations in the following AWS res
 
 An example of an IAM finding taken from the scan result is the `Developers` IAM user group having an overly permissive policy (`AdministratorAccess`) attached:
 
-![alt text](image-3.png)
+<img width="1483" height="756" alt="Screenshot 2026-07-13 224033" src="https://github.com/user-attachments/assets/89ac0266-c682-4454-8e12-191448a10eb3" />
+
 
 See `report_2026-07-10_01-35.html#2-iam-findings` for more information.
 
@@ -167,7 +168,7 @@ See `report_2026-07-10_01-35.html#2-iam-findings` for more information.
 
 <img width="698" height="26" alt="image" src="https://github.com/user-attachments/assets/f76dbe7a-8332-4c3b-bf2a-ee06ee77a61f" />
 
-After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the HTML report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over-permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
+After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over-permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
 
 **Changed Fields Table**
 | Field | Before | After |
@@ -187,6 +188,21 @@ After removing `AdministratorAccess` policy from the `Developers` IAM user group
 <img width="732" height="350" alt="image" src="https://github.com/user-attachments/assets/dc14e819-0ff8-424f-a38f-10104cff3261" />
 
 See `report_2026-07-12_18-00.html#s3-findings` for more information. 
+
+#### Scan Results (After Mitigation)
+
+After enabling the public access block configuration for the public bucket and encrypting both buckets with SSE-KMS (Server-side encryption with AWS Key Management Service keys), another scan was conducted, and now there are no longer any findings linked to S3 resources in the terminal output and reports (see `report_2026-07-14_11-17.html`). This was verified via the AWS Console, which confirmed SSE-KMS encryption and Block Public Access were both enabled. The 3 `HIGH` severity findings for the S3 resources have been successfully resolved.   
+
+**Changed Fields Table - Public Bucket**
+| Field | Before | After |
+| ------ | ------ | ----- |
+| Public Access Configuration Block Enabled? | No | Yes |
+| Encryption with SSE-KMS | No | Yes |
+
+**Changed Fields Table - Private Bucket**
+| Field | Before | After |
+|-------|--------|-------|
+| Encryption with SSE-KMS | No | Yes |
 
 ## Robust Error Handling & Isolated Testing
 

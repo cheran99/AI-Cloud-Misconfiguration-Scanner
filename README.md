@@ -149,6 +149,30 @@ This scanner checks for the following misconfigurations in the following AWS res
   python -m scanner.main  
   ```
 
+## Sample Output
+
+### IAM Check
+
+#### IAM User Group: Developers
+
+**Scan Results (Before Mitigation)**
+![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+See `report_2026-07-10_01-35.html` for more information.
+
+**Scan Results (After Mitigation)**
+![alt text](image-4.png)
+
+After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the HTML report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
+
+**Changed Fields Table**
+| Field | Before | After |
+|-------|--------|-------|
+| **Attached Policy** | AdministratorAccess | DeveloperEC2ScopedAccess, DeveloperS3ScopedAccess |
+| **Services Covered** | All AWS services | EC2 (`StartInstances`, `StopInstances`, `RebootInstances`), S3 (`ListBucket`, `GetObject`, `PutObject`) |
+| **Destructive Actions Allowed**| Yes | No | 
 
 ## Robust Error Handling & Isolated Testing
 

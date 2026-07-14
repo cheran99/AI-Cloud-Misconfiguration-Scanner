@@ -156,6 +156,7 @@ This scanner checks for the following misconfigurations in the following AWS res
 #### IAM User Group: Developers
 
 **Scan Results (Before Mitigation):**
+
 <img width="1499" height="100" alt="image" src="https://github.com/user-attachments/assets/7799b777-f05f-44d4-b2a4-001bfa54c659" />
 
 ![alt text](image-3.png)
@@ -163,8 +164,8 @@ This scanner checks for the following misconfigurations in the following AWS res
 See `report_2026-07-10_01-35.html` for more information.
 
 **Scan Results (After Mitigation):**
-<img width="1257" height="84" alt="image" src="https://github.com/user-attachments/assets/2d6ec0a7-0123-4cf9-9bab-9faf0ade7a11" />
 
+<img width="698" height="26" alt="image" src="https://github.com/user-attachments/assets/f76dbe7a-8332-4c3b-bf2a-ee06ee77a61f" />
 
 After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the HTML report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
 

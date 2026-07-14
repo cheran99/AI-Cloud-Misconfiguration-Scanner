@@ -153,21 +153,21 @@ This scanner checks for the following misconfigurations in the following AWS res
 
 ### IAM Check
 
-#### IAM User Group: Developers
-
-**Scan Results (Before Mitigation):**
+#### Scan Results (Before Mitigation):
 
 <img width="1499" height="100" alt="image" src="https://github.com/user-attachments/assets/7799b777-f05f-44d4-b2a4-001bfa54c659" />
 
+An example of an IAM finding taken from the scan result is the `Developers` IAM user group having an overly permissive policy (`AdministratorAccess`) attached:
+
 ![alt text](image-3.png)
 
-See `report_2026-07-10_01-35.html` for more information.
+See `report_2026-07-10_01-35.html#2-iam-findings` for more information.
 
-**Scan Results (After Mitigation):**
+#### Scan Results (After Mitigation):
 
 <img width="698" height="26" alt="image" src="https://github.com/user-attachments/assets/f76dbe7a-8332-4c3b-bf2a-ee06ee77a61f" />
 
-After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the HTML report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
+After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the HTML report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over-permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
 
 **Changed Fields Table**
 | Field | Before | After |
@@ -175,6 +175,18 @@ After removing `AdministratorAccess` policy from the `Developers` IAM user group
 | **Attached Policy** | AdministratorAccess | DeveloperEC2ScopedAccess, DeveloperS3ScopedAccess |
 | **Services Covered** | All AWS services | EC2 (`StartInstances`, `StopInstances`, `RebootInstances`), S3 (`ListBucket`, `GetObject`, `PutObject`) |
 | **Destructive Actions Allowed**| Yes | No | 
+
+
+### S3 Check
+
+#### Scan Results (Before Mitigation):
+<img width="733" height="443" alt="image" src="https://github.com/user-attachments/assets/fef257b8-8fad-4113-8314-7a76f45dd2fa" />
+
+<img width="734" height="364" alt="image" src="https://github.com/user-attachments/assets/d8c10e40-8b1c-49f6-8ac5-871e46e6d840" />
+
+<img width="732" height="350" alt="image" src="https://github.com/user-attachments/assets/dc14e819-0ff8-424f-a38f-10104cff3261" />
+
+See `report_2026-07-12_18-00.html#s3-findings` for more information. 
 
 ## Robust Error Handling & Isolated Testing
 

@@ -204,6 +204,18 @@ After enabling the public access block configuration for the public bucket and e
 |-------|--------|-------|
 | Encryption with SSE-KMS | No | Yes |
 
+
+### EC2 Check
+
+#### Scan Results (Before Mitigation):
+
+<img width="749" height="713" alt="image" src="https://github.com/user-attachments/assets/879dc566-5f75-40f6-a07f-7f6335b083df" />
+
+See `report_2026-07-15_23-17.html` for more information.
+
+#### Scan Results (After Mitigation)
+
+
 ## Robust Error Handling & Isolated Testing
 
 While testing the S3 checks against a live AWS account, the scanner crashed with an `AttributeError` the moment it encountered a bucket with no Public Access Block configuration. Investigating the crash surfaced a deeper issue: the code was written to catch a named exception class (e.g. `client.exceptions.NoSuchPublicAccessBlockConfiguration`) that doesn't actually exist in this version of `botocore`. AWS documents `NoSuchPublicAccessBlockConfiguration` as an API error code, not an auto-generated Python exception class, so the `except` clause failed before it ever ran.

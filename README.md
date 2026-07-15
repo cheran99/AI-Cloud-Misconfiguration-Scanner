@@ -214,7 +214,13 @@ After enabling the public access block configuration for the public bucket and e
 See `report_2026-07-15_23-17.html` for more information.
 
 #### Scan Results (After Mitigation)
+After revoking the existing inbound rule with the source IP address (`0.0.0.0/0`) from the security group and replacing it with a new inbound rule with the scoped IP range (`203.0.113.0/24`), another scan was conducted and as a result, there are no longer any findings linked to EC2 security groups in the terminal output and reports (see `report_2026-07-15_23-50.html`). This was verified via the AWS Console, which confirmed the EC2 instance attached to the security group (`EC2-Video-Edits`) receives inbound traffic from a scoped IP range instead of `0.0.0.0/0`. The scoped IP range (`203.0.113.0/24`) is a documentation-reserved range and not a real corporate IP address; therefore, it is safe to display this IP address publicly. 
 
+**Changed Fields Table**
+| Field | Before | After |
+|-------|--------|-------|
+| Inbound Rule Source (Port 3389) | `0.0.0.0/0` (open to internet) | `203.0.113.0/24` |
+| Is the EC2 instance exposed to the public? | Yes | No |
 
 ## Robust Error Handling & Isolated Testing
 

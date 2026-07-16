@@ -1,0 +1,568 @@
+
+    <html>
+        <head>
+            <style>
+                body {
+                    background-color: #0d1117;
+                    color: #e6edf3;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                    max-width: 960px;
+                    margin: 40px auto;
+                    padding: 0 24px;
+                    line-height: 1.6;
+                }
+                h1 {
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #58a6ff;
+                    border-bottom: 2px solid #21262d;
+                    padding-bottom: 12px;
+                }
+                h2 {
+                    color: #f0883e;
+                    font-size: 20px;
+                    margin-top: 32px;
+                }
+                h3 {
+                    color: #7ee787;
+                    font-size: 16px;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 16px 0;
+                    font-size: 14px;
+                }
+                th, td {
+                    border: 1px solid #30363d;
+                    padding: 10px 14px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #161b22;
+                    color: #58a6ff;
+                    font-weight: 600;
+                }
+                tr:nth-child(even) {
+                    background-color: #161b22;
+                }
+                ul, ol {
+                    padding-left: 24px;
+                }
+                li {
+                    margin: 4px 0;
+                }
+                code {
+                    background-color: #161b22;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    color: #f85149;
+                }
+                p {
+                    margin: 12px 0;
+                }
+            </style>
+        <title>Cloud Misconfiguration Report</title>
+        </head>
+        <body>
+            <h1>AWS Security Assessment Report</h1>
+<hr />
+<h2>Executive Summary</h2>
+<p>This report presents the findings from an automated security assessment of the AWS environment. A total of <strong>8 findings</strong> were identified across <strong>2 AWS services</strong>: IAM and CloudTrail. The findings range in severity from <strong>HIGH</strong> to <strong>CRITICAL</strong>, indicating significant security risks that require prompt remediation.</p>
+<table>
+<thead>
+<tr>
+<th>Severity</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 CRITICAL</td>
+<td>1</td>
+</tr>
+<tr>
+<td>🟠 HIGH</td>
+<td>7</td>
+</tr>
+<tr>
+<td>🟡 MEDIUM</td>
+<td>0</td>
+</tr>
+<tr>
+<td>🟢 LOW</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>8</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Critical Finding</h2>
+<h3>⛔ CF-001 — No AWS CloudTrail Trails Found</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>CloudTrail</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>CRITICAL</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>N/A (Account-wide)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>No AWS CloudTrail trails are configured in this AWS account. CloudTrail is the primary mechanism for recording API activity and governance events across all AWS services. Without it, there is <strong>zero visibility</strong> into who is performing actions in the environment, making incident detection, forensic investigation, and compliance reporting impossible.</p>
+<h4>Risk Impact</h4>
+<ul>
+<li><strong>No audit log</strong> of API calls, console logins, or resource changes.</li>
+<li>Inability to detect unauthorized access, privilege escalation, or data exfiltration.</li>
+<li>Non-compliance with regulatory frameworks including <strong>PCI-DSS</strong>, <strong>HIPAA</strong>, <strong>SOC 2</strong>, <strong>ISO 27001</strong>, and <strong>CIS AWS Foundations Benchmark</strong>.</li>
+<li>Significant hindrance to any incident response effort.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li>Immediately create a <strong>multi-region CloudTrail trail</strong> to capture all API activity across all AWS regions.</li>
+<li>Enable <strong>log file integrity validation</strong> to detect tampering.</li>
+<li>Store CloudTrail logs in a <strong>dedicated, locked-down S3 bucket</strong> with versioning and MFA Delete enabled.</li>
+<li>Enable <strong>CloudWatch Logs integration</strong> to support real-time alerting on sensitive API calls.</li>
+<li>Consider enabling <strong>CloudTrail Insights</strong> to detect unusual API activity automatically.</li>
+</ol>
+<p>```hcl</p>
+<h1>Example Terraform Configuration</h1>
+<p>resource "aws_cloudtrail" "main" {
+  name                          = "main-trail"
+  s3_bucket_name                = aws_s3_bucket.cloudtrail.id
+  include_global_service_events = true
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+  cloud_watch_logs_group_arn    = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
+  cloud_watch_logs_role_arn     = aws_iam_role.cloudtrail_cw.arn
+}
+```</p>
+<hr />
+<h2>High Severity Findings</h2>
+<h3>🟠 IAM-001 — <code>ai_scanner_user</code> Has Overly Permissive Managed Policy</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>ai_scanner_user</code> (IAM User)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The IAM user <code>ai_scanner_user</code> has been granted an overly permissive managed policy. This violates the <strong>Principle of Least Privilege (PoLP)</strong>, granting more permissions than are necessary for the user's intended function.</p>
+<h4>Risk Impact</h4>
+<ul>
+<li>If credentials are compromised, an attacker gains broad access to AWS resources.</li>
+<li>Increases the blast radius of any accidental or malicious action performed by this user.</li>
+<li>IAM users with static, long-lived credentials represent a higher risk surface than roles.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li>Audit the exact permissions granted to <code>ai_scanner_user</code> using <strong>IAM Access Analyzer</strong> or the <strong>Policy Simulator</strong>.</li>
+<li>Replace the overly permissive managed policy with a <strong>custom, least-privilege policy</strong> scoped to only the actions and resources required for the scanning function.</li>
+<li>Evaluate whether this workload can use an <strong>IAM Role</strong> instead of a long-lived IAM user.</li>
+<li>Enable <strong>IAM Access Advisor</strong> to identify and remove unused permissions.</li>
+<li>Rotate and audit any access keys associated with this user.</li>
+</ol>
+<hr />
+<h3>🟠 IAM-002 — <code>terraform-bootstrap</code> Has Overly Permissive Managed Policy</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>terraform-bootstrap</code> (IAM User/Role)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The <code>terraform-bootstrap</code> principal has been assigned an overly permissive managed policy. Terraform bootstrap identities are commonly granted broad permissions to facilitate initial infrastructure provisioning, but these permissions are frequently not reviewed or tightened after initial setup.</p>
+<h4>Risk Impact</h4>
+<ul>
+<li>If the Terraform credentials are exposed (e.g., in CI/CD pipelines, state files, or version control), an attacker gains wide-ranging access.</li>
+<li>Overly broad Terraform identities can be used to create backdoor users, roles, or resources.</li>
+<li>Violates the principle of least privilege and infrastructure security best practices.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li>Define and enforce a <strong>scoped policy</strong> that grants only the AWS actions required for the specific Terraform modules in use.</li>
+<li>Use <strong>IAM permission boundaries</strong> to limit the maximum permissions the Terraform identity can delegate.</li>
+<li>Replace static IAM user credentials with <strong>short-lived role credentials</strong> via OIDC federation (e.g., GitHub Actions OIDC, AWS IAM Roles Anywhere).</li>
+<li>Regularly review Terraform state files to ensure sensitive data is encrypted and access is restricted.</li>
+<li>Use <strong>Service Control Policies (SCPs)</strong> at the AWS Organizations level to constrain this identity's permissions.</li>
+</ol>
+<hr />
+<h3>🟠 IAM-003 — <code>AWSServiceRoleForResourceExplorer</code> Has Overly Permissive Managed Policy</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForResourceExplorer</code> (AWS Service-Linked Role)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The AWS Service-Linked Role for Resource Explorer has policies permitting a large number of actions across all resources:</p>
+<table>
+<thead>
+<tr>
+<th>Policy Scope</th>
+<th>Actions</th>
+<th>Services Involved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cross-service indexing</td>
+<td>12 actions</td>
+<td><code>organizations</code>, <code>resource-explorer-2</code></td>
+</tr>
+<tr>
+<td>Read-only inventory</td>
+<td>725 actions</td>
+<td><code>access-analyzer</code>, <code>acm</code>, <code>airflow</code>, <code>amplify</code>, and 183+ more</td>
+</tr>
+<tr>
+<td>Extended resource access</td>
+<td>139 actions</td>
+<td><code>backup</code>, <code>bedrock</code>, <code>budgets</code>, <code>cleanrooms</code>, and 39+ more</td>
+</tr>
+</tbody>
+</table>
+<h4>Risk Impact</h4>
+<ul>
+<li>While service-linked roles are managed by AWS, the breadth of permissions means that compromise or misuse of any service invoking this role could expose resource metadata across the entire account.</li>
+<li>Excessive read permissions across hundreds of services increases information disclosure risk.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li><strong>Validate necessity</strong>: Confirm that AWS Resource Explorer is actively required in this account. If not in use, <strong>disable the service</strong> and allow AWS to remove the service-linked role.</li>
+<li>Review the <strong>AWS-managed policies</strong> attached to this role. While service-linked role policies are controlled by AWS, you can use <strong>SCPs</strong> to restrict what the role can access at the organizational level.</li>
+<li>Restrict Resource Explorer's <strong>index scope</strong> to only the regions and resource types actively needed.</li>
+<li>Monitor Resource Explorer activity via CloudTrail (once enabled per CF-001 remediation).</li>
+</ol>
+<hr />
+<h3>🟠 IAM-004 — <code>AWSServiceRoleForSupport</code> Has Overly Permissive Managed Policy</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForSupport</code> (AWS Service-Linked Role)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The AWS Support service-linked role carries an exceptionally large set of permissions to enable AWS Support engineers to diagnose issues on your behalf:</p>
+<table>
+<thead>
+<tr>
+<th>Policy Group</th>
+<th>Actions</th>
+<th>Sample Services</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group 1</td>
+<td>1,504 actions</td>
+<td><code>access-analyzer</code>, <code>account</code>, <code>acm</code>, <code>eks</code>, <code>aidevops</code>, and 82+ more</td>
+</tr>
+<tr>
+<td>Group 2</td>
+<td>1,359 actions</td>
+<td><code>eks</code>, <code>elasticache</code>, <code>elasticbeanstalk</code>, <code>elasticloadbalancing</code>, and 79+ more</td>
+</tr>
+<tr>
+<td>Group 3</td>
+<td>1,520 actions</td>
+<td><code>oam</code>, <code>odb</code>, <code>omics</code>, <code>opsworks</code>, <code>observabilityadmin</code>, and 90+ more</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Combined total: ~4,383 actions across all resources.</strong></p>
+<h4>Risk Impact</h4>
+<ul>
+<li>This role represents one of the broadest permission sets in the account.</li>
+<li>If AWS Support access is not properly gated, it could expose sensitive workloads during a support case.</li>
+<li>Non-essential access to this role without clear business justification is a compliance risk.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li>Verify that <strong>AWS Support</strong> (Business or Enterprise plan) is actively subscribed and that this role is required.</li>
+<li>If AWS Support access is not needed, consider <strong>removing the Support subscription</strong> or restricting access using SCPs to limit the scope of actions permitted.</li>
+<li>Use <strong>AWS Support access controls</strong> to restrict which IAM users/roles can open support cases.</li>
+<li>Regularly audit support case activity to ensure no unauthorized cases are opened.</li>
+<li>Apply SCPs to prevent the Support role from accessing particularly sensitive services or resources.</li>
+</ol>
+<hr />
+<h3>🟠 IAM-005 — <code>AWSServiceRoleForTrustedAdvisor</code> Has Overly Permissive Managed Policy</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>AWSServiceRoleForTrustedAdvisor</code> (AWS Service-Linked Role)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The AWS Trusted Advisor service-linked role has permissions spanning 115 actions across 24+ services including <code>access-analyzer</code>, <code>autoscaling</code>, <code>ce</code>, <code>cloudformation</code>, <code>cloudfront</code>, and more, all scoped to <strong>all resources</strong>.</p>
+<h4>Risk Impact</h4>
+<ul>
+<li>Trusted Advisor performs account-wide checks, necessitating broad read access. However, unrestricted access to all resources means any misconfiguration in the service could expose sensitive configuration data.</li>
+<li>The role's broad scope includes cost and billing data (<code>ce</code>), security posture data, and infrastructure configuration.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li>Confirm Trusted Advisor is actively used and providing value. If not, <strong>disable the service</strong> to remove the role.</li>
+<li>If Trusted Advisor is required, ensure its findings are reviewed regularly and remediated promptly — this is the primary value control.</li>
+<li>Use <strong>SCPs</strong> to restrict the Trusted Advisor role from accessing services not relevant to your environment.</li>
+<li>Ensure only authorized personnel have access to view Trusted Advisor recommendations, as they contain sensitive security findings.</li>
+</ol>
+<hr />
+<h3>🟠 IAM-006 &amp; IAM-007 — <code>EC2InstanceConnectRole</code> Has Overly Permissive Managed Policies</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Service</strong></td>
+<td>IAM</td>
+</tr>
+<tr>
+<td><strong>Severity</strong></td>
+<td>HIGH</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td><code>EC2InstanceConnectRole</code> (IAM Role)</td>
+</tr>
+</tbody>
+</table>
+<h4>Description</h4>
+<p>The <code>EC2InstanceConnectRole</code> has <strong>two separate overly permissive policy findings</strong>:</p>
+<p><strong>Finding 1 — EC2 Instance Connect Access:</strong>
+| Actions | Service |
+|---|---|
+| 1 action | <code>ec2-instance-connect</code> — scoped to all resources |</p>
+<p><strong>Finding 2 — Systems Manager &amp; Supporting Services:</strong>
+| Actions | Service |
+|---|---|
+| 14 actions | <code>ssm</code> |
+| 8 actions | <code>s3</code> |
+| 6 actions | <code>ec2messages</code> |
+| 5 actions | <code>logs</code> |
+| 4 actions | <code>ssmmessages</code> |
+| 2 actions | <code>ds</code> |
+| 1 action | <code>cloudwatch</code> |
+| 1 action | <code>ec2</code> |</p>
+<p>All permissions are scoped to <strong>all resources (<code>*</code>)</strong>, meaning the role can connect to and manage <strong>any EC2 instance</strong> in the account, not just specific ones.</p>
+<h4>Risk Impact</h4>
+<ul>
+<li>If this role is assumed by an unauthorized user or compromised entity, it provides unrestricted SSH/RDP access to all EC2 instances.</li>
+<li>Broad SSM permissions (<code>ssm:*</code> across all resources) can enable command execution on any instance, configuration changes, and session recording manipulation.</li>
+<li>Unrestricted S3 access from this role could expose or exfiltrate data stored in SSM-related buckets.</li>
+</ul>
+<h4>Recommended Remediation</h4>
+<ol>
+<li><strong>Restrict resource scope</strong>: Update both policies to target specific EC2 instance ARNs, SSM parameter paths, and S3 bucket ARNs rather than using wildcard (<code>*</code>) resources.</li>
+</ol>
+<p><code>json
+// Example: Restrict EC2 Instance Connect to specific instances
+{
+  "Effect": "Allow",
+  "Action": "ec2-instance-connect:SendSSHPublicKey",
+  "Resource": "arn:aws:ec2:REGION:ACCOUNT_ID:instance/i-xxxxxxxxxxxxxxxxx",
+  "Condition": {
+    "StringEquals": { "ec2:osuser": "ec2-user" }
+  }
+}</code></p>
+<ol>
+<li>Apply <strong>IAM Conditions</strong> to restrict instance connect to specific instance IDs, OS users, or tags (e.g., <code>ec2:ResourceTag/Environment: production</code>).</li>
+<li>Restrict SSM actions to only those required (e.g., <code>ssm:StartSession</code>, <code>ssm:TerminateSession</code>) and scope to specific instance resource ARNs.</li>
+<li>Enable <strong>SSM Session Manager logging</strong> to CloudWatch and S3 to maintain an audit trail of all sessions.</li>
+<li>Consider implementing <strong>AWS IAM Identity Center (SSO)</strong> with time-limited access for instance access rather than a persistent broad role.</li>
+</ol>
+<hr />
+<h2>Summary of Recommendations</h2>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Action</th>
+<th>Finding(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 Immediate</td>
+<td>Enable a multi-region CloudTrail trail</td>
+<td>CF-001</td>
+</tr>
+<tr>
+<td>🔴 Immediate</td>
+<td>Restrict <code>EC2InstanceConnectRole</code> to specific instance ARNs</td>
+<td>IAM-006, IAM-007</td>
+</tr>
+<tr>
+<td>🟠 Short-term</td>
+<td>Apply least-privilege policies to <code>ai_scanner_user</code></td>
+<td>IAM-001</td>
+</tr>
+<tr>
+<td>🟠 Short-term</td>
+<td>Replace <code>terraform-bootstrap</code> credentials with OIDC role federation</td>
+<td>IAM-002</td>
+</tr>
+<tr>
+<td>🟡 Medium-term</td>
+<td>Review and disable unused AWS service-linked roles</td>
+<td>IAM-003, IAM-004, IAM-005</td>
+</tr>
+<tr>
+<td>🟡 Medium-term</td>
+<td>Apply SCPs to limit service-linked role blast radius</td>
+<td>IAM-003, IAM-004, IAM-005</td>
+</tr>
+<tr>
+<td>🟡 Ongoing</td>
+<td>Regularly review IAM permissions using Access Analyzer and Access Advisor</td>
+<td>All IAM</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Compliance Implications</h2>
+<p>The identified findings have direct implications for the following frameworks:</p>
+<table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Impacted Controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CIS AWS Foundations Benchmark</strong></td>
+<td>2.1 (CloudTrail), 1.16 (IAM Policies)</td>
+</tr>
+<tr>
+<td><strong>PCI-DSS v4.0</strong></td>
+<td>Req 10 (Logging), Req 7 (Least Privilege)</td>
+</tr>
+<tr>
+<td><strong>HIPAA</strong></td>
+<td>§164.312(b) Audit Controls</td>
+</tr>
+<tr>
+<td><strong>SOC 2 Type II</strong></td>
+<td>CC6.1, CC6.3, CC7.2</td>
+</tr>
+<tr>
+<td><strong>NIST 800-53</strong></td>
+<td>AU-2, AC-6, AC-3</td>
+</tr>
+<tr>
+<td><strong>ISO 27001:2022</strong></td>
+<td>A.8.5, A.8.18, A.8.15</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2>
+<p>The AWS environment assessed contains <strong>one critical gap</strong> (absence of CloudTrail) and <strong>seven high-severity IAM misconfiguration findings</strong>. The lack of CloudTrail is the most urgent issue, as it means there is currently no visibility into any actions being taken in this account, including any exploitation of the overly permissive IAM roles identified. Remediating CloudTrail should be treated as an <strong>emergency action item</strong>.</p>
+<p>The IAM findings reflect a pattern of <strong>excessive privilege</strong>, both in custom identities (<code>ai_scanner_user</code>, <code>terraform-bootstrap</code>, <code>EC2InstanceConnectRole</code>) and in AWS-managed service-linked roles. A comprehensive IAM remediation effort following the <strong>Principle of Least Privilege</strong> is strongly recommended.</p>
+<hr />
+<p><em>Report generated by automated security scanner. All findings should be validated in the context of your specific environment and business requirements before remediation.</em></p>
+        </body>
+    </html>
+    

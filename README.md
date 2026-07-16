@@ -159,8 +159,7 @@ This scanner checks for the following misconfigurations in the following AWS res
 
 An example of an IAM finding taken from the scan result is the `Developers` IAM user group having an overly permissive policy (`AdministratorAccess`) attached:
 
-<img width="1483" height="756" alt="Screenshot 2026-07-13 224033" src="https://github.com/user-attachments/assets/89ac0266-c682-4454-8e12-191448a10eb3" />
-
+<img width="729" height="285" alt="image" src="https://github.com/user-attachments/assets/4918e5b4-5af6-4fd3-a9ef-73117fae0f94" />
 
 See `report_2026-07-10_01-35.html#2-iam-findings` for more information.
 

@@ -170,6 +170,7 @@ See `report_2026-07-10_01-35.html#2-iam-findings` for more information.
 After removing `AdministratorAccess` policy from the `Developers` IAM user group, two inline policies were created, `DeveloperEC2ScopedAccess` and `DeveloperS3ScopedAccess`, and are now attached to this user group. After conducting another scan, the finding that is linked to the  Developers IAM group is no longer seen in the report (see `report_2026-07-12_18-00.html#iam-findings` for more information), because the user group no longer has an over-permissive policy. As a result, the IAM findings with `HIGH` severity levels dropped from 8 to 7 findings.
 
 **Changed Fields Table**
+
 | Field | Before | After |
 |-------|--------|-------|
 | **Attached Policy** | AdministratorAccess | DeveloperEC2ScopedAccess, DeveloperS3ScopedAccess |
@@ -194,12 +195,14 @@ See `report_2026-07-12_18-00.html#s3-findings` for more information.
 After enabling the public access block configuration for the public bucket and encrypting both buckets with SSE-KMS (Server-side encryption with AWS Key Management Service keys), another scan was conducted, and now there are no longer any findings linked to S3 resources in the terminal output and reports (see `report_2026-07-14_11-17.html`). This was verified via the AWS Console, which confirmed SSE-KMS encryption and Block Public Access were both enabled. The 3 `HIGH` severity findings for the S3 resources have been successfully resolved.   
 
 **Changed Fields Table - Public Bucket**
+
 | Field | Before | After |
 | ------ | ------ | ----- |
 | Public Access Configuration Block Enabled? | No | Yes |
 | Encryption with SSE-KMS | No | Yes |
 
 **Changed Fields Table - Private Bucket**
+
 | Field | Before | After |
 |-------|--------|-------|
 | Encryption with SSE-KMS | No | Yes |
@@ -217,6 +220,7 @@ See `report_2026-07-15_23-17.html` for more information.
 After revoking the existing inbound rule with the source IP address (`0.0.0.0/0`) from the security group and replacing it with a new inbound rule with the scoped IP range (`203.0.113.0/24`), another scan was conducted and as a result, there are no longer any findings linked to EC2 security groups in the terminal output and reports (see `report_2026-07-15_23-50.html`). This was verified via the AWS Console, which confirmed the EC2 instance attached to the security group (`EC2-Video-Edits`) receives inbound traffic from a scoped IP range instead of `0.0.0.0/0`. The scoped IP range (`203.0.113.0/24`) is a documentation-reserved range and not a real corporate IP address; therefore, it is safe to display this IP address publicly. 
 
 **Changed Fields Table**
+
 | Field | Before | After |
 |-------|--------|-------|
 | Inbound Rule Source (Port 3389) | `0.0.0.0/0` (open to internet) | `203.0.113.0/24` |
@@ -226,14 +230,16 @@ After revoking the existing inbound rule with the source IP address (`0.0.0.0/0`
 
 #### Scan Results (Before Mitigation):
 
-**Initial State**
+**Initial State:**
+
 When initial scans were conducted, there were no existing CloudTrails, therefore, the findings returned with `CRITICAL` severity findings:
 
 <img width="755" height="332" alt="image" src="https://github.com/user-attachments/assets/f00f3393-7b76-456a-9338-ba6042de5dd1" />
 
 See `report_2026-07-12_18-00.html#cloudtrail-findings` for more information.
 
-**Trail Created, Not Logging**
+**Trail Created, Not Logging:**
+
 After creating a CloudTrail with a new S3 bucket (where the logs will be stored) while deliberately turning off logging, another scan was conducted, which returned with 2 `HIGH` severity findings linked to CloudTrail and S3 resources:
 
 <img width="728" height="260" alt="image" src="https://github.com/user-attachments/assets/2cae306d-4b4f-4980-b476-8d5f47ddad29" />
@@ -247,11 +253,13 @@ See `report_2026-07-16_01-44.html` for more information.
 After enabling logging for the CloudTrail (`Video-Edits-Trail`) and encrypting the CloudTrail bucket (`aws-cloudtrail-logs-211125321299-2a1a565d`) with SSE-KMS (Server-side encryption with AWS Key Management Service keys), another scan was conducted, and now there are no findings linked to CloudTrail and S3 resources in the terminal output and report (see `report_2026-07-16_10-17.html` for more information). This was verified via the AWS Console, which showed that CloudTrail (`Video-Edits-Trail`) is logging and the S3 bucket (`aws-cloudtrail-logs-211125321299-2a1a565d`) is now encrypted with SSE-KMS. 
 
 **Changed Fields Table - CloudTrail**
+
 | Field | Before | After |
 |-------|--------|-------|
 | Is the CloudTrail logging? | No | Yes |
 
 **Changed Fields Table - S3 Bucket**
+
 | Field | Before | After |
 |-------|--------|-------|
 | Encryption with SSE-KMS  | No | Yes |

@@ -16,6 +16,11 @@ For example, think of a new season of Daredevil: Born Again. What happens if eve
 
 Broadcasters are heavily dependent on time-sensitive, IP-based remote workflows. Live events require zero margin of error for instantaneous processing. If an attack such as a DDoS or signal hijacking occurs during a live broadcast, this can cause loss of audience retention, irreparable brand damage, and heavy losses in real-time advertising revenue. 
 
+## Architecture Diagram
+
+<img width="1872" height="745" alt="AI Cloud Misconfiguration Scanner Diagram drawio" src="https://github.com/user-attachments/assets/b3a1b4db-c758-430c-968f-71ba33d0c1e3" />
+
+
 ## How It Works
 
 - This AI-powered cloud misconfiguration scanner connects to AWS and checks for misconfigurations among the existing resources, such as S3, IAM, EC2, and CloudTrail.

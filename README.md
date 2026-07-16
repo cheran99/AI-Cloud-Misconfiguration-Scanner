@@ -210,7 +210,7 @@ After enabling the public access block configuration for the public bucket and e
 
 #### Scan Results (Before Mitigation):
 
-<img width="749" height="713" alt="image" src="https://github.com/user-attachments/assets/879dc566-5f75-40f6-a07f-7f6335b083df" />
+<img width="736" height="335" alt="image" src="https://github.com/user-attachments/assets/8ebc6144-4fda-478c-a41c-fa0c11d02c9b" />
 
 See `report_2026-07-15_23-17.html` for more information.
 

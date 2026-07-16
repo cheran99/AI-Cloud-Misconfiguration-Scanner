@@ -181,11 +181,12 @@ After removing `AdministratorAccess` policy from the `Developers` IAM user group
 ### S3 Check
 
 #### Scan Results (Before Mitigation):
-<img width="733" height="443" alt="image" src="https://github.com/user-attachments/assets/fef257b8-8fad-4113-8314-7a76f45dd2fa" />
 
-<img width="734" height="364" alt="image" src="https://github.com/user-attachments/assets/d8c10e40-8b1c-49f6-8ac5-871e46e6d840" />
+<img width="733" height="332" alt="image" src="https://github.com/user-attachments/assets/9afe12dd-b269-4b3c-9935-43849c82c0ab" />
 
-<img width="732" height="350" alt="image" src="https://github.com/user-attachments/assets/dc14e819-0ff8-424f-a38f-10104cff3261" />
+<img width="737" height="291" alt="image" src="https://github.com/user-attachments/assets/561427ca-87eb-4b02-b38c-0e058435fd92" />
+
+<img width="725" height="268" alt="image" src="https://github.com/user-attachments/assets/f62b8f28-f1e4-4882-9cff-daf2aa6819a2" />
 
 See `report_2026-07-12_18-00.html#s3-findings` for more information. 
 
@@ -221,6 +222,40 @@ After revoking the existing inbound rule with the source IP address (`0.0.0.0/0`
 |-------|--------|-------|
 | Inbound Rule Source (Port 3389) | `0.0.0.0/0` (open to internet) | `203.0.113.0/24` |
 | Is the EC2 instance exposed to the public? | Yes | No |
+
+### CloudTrail Check
+
+#### Scan Results (Before Mitigation):
+
+**Initial State**
+When initial scans were conducted, there were no existing CloudTrails, therefore, the findings returned with `CRITICAL` severity findings:
+
+<img width="755" height="332" alt="image" src="https://github.com/user-attachments/assets/f00f3393-7b76-456a-9338-ba6042de5dd1" />
+
+See `report_2026-07-12_18-00.html#cloudtrail-findings` for more information.
+
+**Trail Created, Not Logging**
+After creating a CloudTrail with a new S3 bucket (where the logs will be stored) while deliberately turning off logging, another scan was conducted, which returned with 2 `HIGH` severity findings linked to CloudTrail and S3 resources:
+
+<img width="728" height="260" alt="image" src="https://github.com/user-attachments/assets/2cae306d-4b4f-4980-b476-8d5f47ddad29" />
+
+<img width="737" height="246" alt="image" src="https://github.com/user-attachments/assets/47525cf6-7052-4423-8a26-0c1dba2cd78b" />
+
+See `report_2026-07-16_01-44.html` for more information.
+
+#### Scan Results (After Mitigation):
+
+After enabling logging for the CloudTrail (`Video-Edits-Trail`) and encrypting the CloudTrail bucket (`aws-cloudtrail-logs-211125321299-2a1a565d`) with SSE-KMS (Server-side encryption with AWS Key Management Service keys), another scan was conducted, and now there are no findings linked to CloudTrail and S3 resources in the terminal output and report (see `report_2026-07-16_10-17.html` for more information). This was verified via the AWS Console, which showed that CloudTrail (`Video-Edits-Trail`) is logging and the S3 bucket (`aws-cloudtrail-logs-211125321299-2a1a565d`) is now encrypted with SSE-KMS. 
+
+**Changed Fields Table - CloudTrail**
+| Field | Before | After |
+|-------|--------|-------|
+| Is the CloudTrail logging? | No | Yes |
+
+**Changed Fields Table - S3 Bucket**
+| Field | Before | After |
+|-------|--------|-------|
+| Encryption with SSE-KMS  | No | Yes |
 
 ## Robust Error Handling & Isolated Testing
 

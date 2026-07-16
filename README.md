@@ -18,7 +18,7 @@ Broadcasters are heavily dependent on time-sensitive, IP-based remote workflows.
 
 ## Architecture Diagram
 
-<img width="1872" height="745" alt="AI Cloud Misconfiguration Scanner Diagram drawio" src="https://github.com/user-attachments/assets/b3a1b4db-c758-430c-968f-71ba33d0c1e3" />
+<img width="2048" height="970" alt="AI Cloud Misconfiguration Scanner Diagram drawio" src="https://github.com/user-attachments/assets/c6936e7d-8269-4f47-ac2d-46d939b21295" />
 
 
 ## How It Works

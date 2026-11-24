@@ -80,7 +80,7 @@ This scanner checks for the following misconfigurations in the following AWS res
 ### Install The Repository To Your Local Machine
 - Clone this repository to your local machine:
   ```
-  git clone https://github.com/<your-username>/AI-Cloud-Misconfiguration-Scanner.git
+  git clone https://github.com/cheran99/AI-Cloud-Misconfiguration-Scanner.git
   ```
 
 ### Set Up AWS Account And IAM Account For Terraform Deployment
